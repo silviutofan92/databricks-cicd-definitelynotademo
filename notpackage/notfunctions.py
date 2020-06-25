@@ -17,7 +17,6 @@ def python_f(n_rows):
 spark_count = spark_f(100001)
 python_count = python_f(99991)
 
-print(spark_count)
-print(python_count)
+print("I guess this worked")
 
 #trying some stuff in release
