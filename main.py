@@ -5,5 +5,6 @@ spark = SparkSession\
 
 print("Testing simple count")
 
-# The Spark code will execute on the Azure Databricks cluster.
+# The Spark code will execute on the Azure Databricks cluster...
 print(spark.range(100).count())
+
