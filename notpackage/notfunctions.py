@@ -14,8 +14,8 @@ def python_f(n_rows):
     n = len(range(n_rows))
     return n
 
-spark_count = spark_f(10000)
-python_count = python_f(9999)
+spark_count = spark_f(100001)
+python_count = python_f(99991)
 
 print(spark_count)
 print(python_count)
