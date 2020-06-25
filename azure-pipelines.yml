@@ -51,6 +51,7 @@ steps:
 - script: |
     cd $(Build.Repository.LocalPath)/
     python3 setup.py sdist bdist_wheel
+    ls
     ls dist/
   displayName: 'Build Python Wheel for Libs'
 
