@@ -60,6 +60,8 @@ steps:
     git diff --name-only --diff-filter=AMR HEAD^1 HEAD | xargs -I '{}' cp --parents -r '{}' $(Build.BinariesDirectory)
     mkdir -p $(Build.BinariesDirectory)/libraries/python/libs
     cp $(Build.Repository.LocalPath)/dist/*.* $(Build.BinariesDirectory)/libraries/python/libs
+    mkdir -p $(Build.BinariesDirectory)/cicd-scripts
+    cp $(Build.Repository.LocalPath)/cicd-scripts/*.* $(Build.BinariesDirectory)/cicd-scripts
   displayName: 'Get Changes'
 # Add the wheel file you just created
 # The objective is to add all files intended for the current release.
