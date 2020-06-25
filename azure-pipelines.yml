@@ -49,7 +49,7 @@ steps:
 
 #Package code into a Py Wheel
 - script: |
-    cd $(Build.Repository.LocalPath)/libraries/python/dbxdemo
+    cd $(Build.Repository.LocalPath)/
     python3 setup.py sdist bdist_wheel
     ls dist/
   displayName: 'Build Python Wheel for Libs'
@@ -57,9 +57,10 @@ steps:
 # Use git diff to flag files added in the most recent git merge
 - script: |
     git diff --name-only --diff-filter=AMR HEAD^1 HEAD | xargs -I '{}' cp --parents -r '{}' $(Build.BinariesDirectory)
-
-# Add the wheel file you just created along with utility scripts used by the Release pipeline
-# The implementation in your Pipeline may be different.
+    mkdir -p $(Build.BinariesDirectory)/libraries/python/libs
+    cp $(Build.Repository.LocalPath)/dist/*.* $(Build.BinariesDirectory)/libraries/python/libs
+  displayName: 'Get Changes'
+# Add the wheel file you just created
 # The objective is to add all files intended for the current release.
 
 # Create the deployment artifact and publish it to the artifact repository
