@@ -3,34 +3,74 @@
 # Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
-trigger:
-- master
 
+# New code merged into the release branch initiaties a build
+trigger:
+- release
+
+#Specify VM
 pool:
   vmImage: 'ubuntu-latest'
-strategy:
-  matrix:
-    Python27:
-      python.version: '2.7'
-    Python35:
-      python.version: '3.5'
-    Python36:
-      python.version: '3.6'
-    Python37:
-      python.version: '3.7'
 
+# Install Python. The version must match the version on the Databricks cluster.
 steps:
 - task: UsePythonVersion@0
+  displayName: 'Use Python 3.7'
   inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+    versionSpec: 3.7
 
+# Install required Python modules, including databricks-connect, required to execute a unit test
+# on a cluster.
 - script: |
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-  displayName: 'Install dependencies'
+    pip install pytest requests setuptools wheel
+    pip install -U databricks-connect==6.5.*
+  displayName: 'Load Python Dependencies'
 
+# Use environment variables to pass Databricks login information to the Databricks Connect
+# configuration function
 - script: |
-    pip install pytest pytest-azurepipelines
-    pytest
-  displayName: 'pytest'
+    echo "y
+    $(workspace_url)
+    $(databricks_token)
+    $(cluster_id)
+    $(org_id)
+    15001" | databricks-connect configure
+  displayName: 'Configure DBConnect'
+
+#Download code from designated branch to the agent
+- checkout: self
+  persistCredentials: true
+  clean: true
+
+- script: git checkout release
+  displayName: 'Get Latest Branch'
+
+#Test goes here
+
+#Package code into a Py Wheel
+- script: |
+    cd $(Build.Repository.LocalPath)/libraries/python/dbxdemo
+    python3 setup.py sdist bdist_wheel
+    ls dist/
+  displayName: 'Build Python Wheel for Libs'
+
+# Use git diff to flag files added in the most recent git merge
+- script: |
+    git diff --name-only --diff-filter=AMR HEAD^1 HEAD | xargs -I '{}' cp --parents -r '{}' $(Build.BinariesDirectory)
+
+# Add the wheel file you just created along with utility scripts used by the Release pipeline
+# The implementation in your Pipeline may be different.
+# The objective is to add all files intended for the current release.
+
+# Create the deployment artifact and publish it to the artifact repository
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.BinariesDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    ArtifactName: 'DatabricksBuild'
