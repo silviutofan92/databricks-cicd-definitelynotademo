@@ -14,9 +14,6 @@ def python_f(n_rows):
     n = len(range(n_rows))
     return n
 
-spark_count = spark_f(100001)
-python_count = python_f(99991)
+print("I guess this worked - Hello everyone!")
 
-print("I guess this worked")
-
-#trying some stuff in release
+#testing my Azure DevOps pipelines
