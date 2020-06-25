@@ -24,7 +24,6 @@ steps:
 - script: |
     pip install pytest requests setuptools wheel
     pip install -U databricks-connect==6.5.*
-    pip install requests
   displayName: 'Load Python Dependencies'
 
 # Use environment variables to pass Databricks login information to the Databricks Connect
