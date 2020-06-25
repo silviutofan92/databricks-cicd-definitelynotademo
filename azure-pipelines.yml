@@ -1,0 +1,80 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+
+# New code merged into the release branch initiaties a build
+trigger:
+- release
+
+#Specify VM
+pool:
+  vmImage: 'ubuntu-latest'
+
+# Install Python. The version must match the version on the Databricks cluster.
+steps:
+- task: UsePythonVersion@0
+  displayName: 'Use Python 3.7'
+  inputs:
+    versionSpec: 3.7
+
+# Install required Python modules, including databricks-connect, required to execute a unit test
+# on a cluster.
+- script: |
+    pip install pytest requests setuptools wheel
+    pip install -U databricks-connect==6.5.*
+  displayName: 'Load Python Dependencies'
+
+# Use environment variables to pass Databricks login information to the Databricks Connect
+# configuration function
+- script: |
+    echo "y
+    $(workspace_url)
+    $(databricks_token)
+    $(cluster_id)
+    $(org_id)
+    15001" | databricks-connect configure
+  displayName: 'Configure DBConnect'
+
+#Download code from designated branch to the agent
+- checkout: self
+  persistCredentials: true
+  clean: true
+
+- script: git checkout release
+  displayName: 'Get Latest Branch'
+
+#Test goes here
+
+#Package code into a Py Wheel
+- script: |
+    cd $(Build.Repository.LocalPath)/
+    python3 setup.py sdist bdist_wheel
+    ls
+    ls dist/
+  displayName: 'Build Python Wheel for Libs'
+
+# Use git diff to flag files added in the most recent git merge
+- script: |
+    git diff --name-only --diff-filter=AMR HEAD^1 HEAD | xargs -I '{}' cp --parents -r '{}' $(Build.BinariesDirectory)
+    mkdir -p $(Build.BinariesDirectory)/libraries/python/libs
+    cp $(Build.Repository.LocalPath)/dist/*.* $(Build.BinariesDirectory)/libraries/python/libs
+    mkdir -p $(Build.BinariesDirectory)/cicd-scripts
+    cp $(Build.Repository.LocalPath)/cicd-scripts/*.* $(Build.BinariesDirectory)/cicd-scripts
+  displayName: 'Get Changes'
+# Add the wheel file you just created
+# The objective is to add all files intended for the current release.
+
+# Create the deployment artifact and publish it to the artifact repository
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.BinariesDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    ArtifactName: 'DatabricksBuild'
