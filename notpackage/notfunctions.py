@@ -3,8 +3,6 @@ spark = SparkSession\
 .builder\
 .getOrCreate()
 
-print("Testing simple count")
-
 def spark_f(n_rows):
     # The Spark code will execute on the Azure Databricks cluster...
     n = spark.range(n_rows).count()
@@ -14,6 +12,6 @@ def python_f(n_rows):
     n = len(range(n_rows))
     return n
 
-print("I guess this worked - Hello everyone!")
+print("Hi Microsoft team! 29 June test)
 
 #testing my Azure DevOps pipelines
