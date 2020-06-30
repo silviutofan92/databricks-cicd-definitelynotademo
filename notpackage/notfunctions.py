@@ -12,5 +12,5 @@ def python_f(n_rows):
     n = len(range(n_rows))
     return n
 
-print("Final test before session")
+print("Hello! Thanks for having me on the session!")
 
