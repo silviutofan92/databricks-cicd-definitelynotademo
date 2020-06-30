@@ -12,6 +12,5 @@ def python_f(n_rows):
     n = len(range(n_rows))
     return n
 
-print("Hi Microsoft team! 29 June test again")
+print("Hi Microsoft team! Morning test")
 
-#testing my Azure DevOps pipelines
