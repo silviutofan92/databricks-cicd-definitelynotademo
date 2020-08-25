@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(name='notademo',
-      version='0.0.20',
-      description='A sample PySpark application - 0.0.20',
+      version='0.0.21',
+      description='A sample PySpark application - 0.0.21',
       author='Silviu Tofan',
       author_email='silviu@databricks.com',
       url='www.databricks.com',
